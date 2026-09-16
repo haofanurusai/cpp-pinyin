@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(CPP_PINYIN_BUILD_TESTS "Build test cases" OFF)
 option(CPP_PINYIN_INSTALL "Install library" ON)
+option(CPP_PINYIN_ENABLE_FILE_IO "Enable legacy std::filesystem/std::ifstream dictionaries" OFF)
+option(CPP_PINYIN_ENABLE_BIANG "Enable rare U+30EDD/U+30EDE biang compatibility" OFF)
+option(CPP_PINYIN_ENABLE_TRADITIONAL "Enable traditional-to-simplified conversion" OFF)
 
 # ----------------------------------
 # CMake Settings
@@ -50,6 +53,12 @@ if (NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PUBLIC CPP_PINYIN_STATIC)
 endif ()
 target_compile_definitions(${PROJECT_NAME} PRIVATE CPP_PINYIN_LIBRARY)
+# Public feature macros override include/cpp-pinyin/config.h defaults when CMake is used.
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+        CPP_PINYIN_ENABLE_FILE_IO=$<BOOL:${CPP_PINYIN_ENABLE_FILE_IO}>
+        CPP_PINYIN_ENABLE_BIANG=$<BOOL:${CPP_PINYIN_ENABLE_BIANG}>
+        CPP_PINYIN_ENABLE_TRADITIONAL=$<BOOL:${CPP_PINYIN_ENABLE_TRADITIONAL}>
+)
 
 target_sources(${PROJECT_NAME} PRIVATE ${_src})
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -57,12 +66,14 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 if (CPP_PINYIN_BUILD_TESTS)
     add_subdirectory(tests)
 
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND
-            ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
-            ${CMAKE_BINARY_DIR}/tests/dict
-    )
+    if (CPP_PINYIN_ENABLE_FILE_IO)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND
+                ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
+                ${CMAKE_BINARY_DIR}/tests/dict
+        )
+    endif ()
 endif ()
 
 # ----------------------------------
@@ -85,12 +96,24 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # ----------------------------------
 # Copy dictionary files
 # ----------------------------------
+if (CPP_PINYIN_ENABLE_FILE_IO)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND
+            ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
+            ${CMAKE_BINARY_DIR}/bin/dict
+    )
+endif ()
+
+#[[
+Original unconditional dictionary-copy block retained instead of deleting it:
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND
         ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
         ${CMAKE_BINARY_DIR}/bin/dict
 )
+]]
 
 # ----------------------------------
 # Install settings
@@ -137,19 +160,24 @@ if (CPP_PINYIN_INSTALL)
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
     )
 
-    if (NOT DEFINED CPP_PINYIN_VCPKG_DICT_DIR)
-        set(dictdir ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/dict)
-        install(
-                DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
-                DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
-        )
-    else ()
-        set(dictdir ${CPP_PINYIN_VCPKG_DICT_DIR}/dict)
-        install(
-                DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
-                DESTINATION ${CPP_PINYIN_VCPKG_DICT_DIR}
-        )
+    if (CPP_PINYIN_ENABLE_FILE_IO)
+        if (NOT DEFINED CPP_PINYIN_VCPKG_DICT_DIR)
+            set(dictdir ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/dict)
+            install(
+                    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
+                    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
+            )
+        else ()
+            set(dictdir ${CPP_PINYIN_VCPKG_DICT_DIR}/dict)
+            install(
+                    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/dict
+                    DESTINATION ${CPP_PINYIN_VCPKG_DICT_DIR}
+            )
+        endif ()
     endif ()
+
+    #[[ Original install-dictionary block is intentionally retained in the source
+         history above; the active form is gated by CPP_PINYIN_ENABLE_FILE_IO. ]]
 endif ()
 
 # ----------------------------------

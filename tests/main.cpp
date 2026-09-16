@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <cpp-pinyin/config.h>
 
 #include <cpp-pinyin/Pinyin.h>
 #include <cpp-pinyin/G2pglobal.h>
@@ -10,9 +11,11 @@
 using namespace Test;
 
 int main(int argc, char *argv[]) {
+#if CPP_PINYIN_ENABLE_FILE_IO
     const auto applicationDirPath = std::filesystem::current_path() / "dict";
     Pinyin::setDictionaryPath(applicationDirPath);
     std::cout << "Path: " << applicationDirPath << std::endl;
+#endif
 
     const ManTest manTest;
     std::cout << "Pinyin G2P test: " << std::endl;
@@ -24,6 +27,7 @@ int main(int argc, char *argv[]) {
     manTest.unToneBatchTest();
     std::cout << "--------------------\n" << std::endl;
 
+#if CPP_PINYIN_ENABLE_FILE_IO
     const JyuptingTest jyuptingTest;
     std::cout << "Cantonese G2P test:" << std::endl;
     std::cout << "--------------------" << std::endl;
@@ -31,6 +35,7 @@ int main(int argc, char *argv[]) {
     std::cout << "--------------------\n" << std::endl;
     jyuptingTest.untoneBatchTest();
     std::cout << "--------------------\n" << std::endl;
+#endif
 
     std::cout << "G2P mix test:" << std::endl;
     std::cout << "--------------------" << std::endl;

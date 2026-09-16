@@ -18,8 +18,13 @@ namespace Test
             std::cerr << "Polyphonic test failed." << std::endl;
         if (g2p_zh->isPolyphonic("犬"))
             std::cerr << "Polyphonic test failed." << std::endl;
+#if CPP_PINYIN_ENABLE_TRADITIONAL
         if (g2p_zh->tradToSim("臺") != "台")
             std::cerr << "Traditional to Simplified test failed." << std::endl;
+#else
+        if (g2p_zh->tradToSim("臺") != "臺")
+            std::cerr << "Traditional disabled passthrough test failed." << std::endl;
+#endif
         if (g2p_zh->tradToSim("犬") != "犬")
             std::cerr << "Traditional to Simplified test failed." << std::endl;
         if (g2p_zh->getDefaultPinyin("秀", Pinyin::ManTone::Style::NORMAL).at(0) != "xiu")
@@ -32,6 +37,11 @@ namespace Test
             std::cerr << "Pinyin Style::TONE2 test failed." << std::endl;
         if (g2p_zh->getDefaultPinyin("秀", Pinyin::ManTone::Style::TONE3).at(0) != "xiu4")
             std::cerr << "Pinyin Style::TONE3 test failed." << std::endl;
+        if (g2p_zh->getDefaultPinyin("中", Pinyin::ManTone::Style::SHUANGPIN).at(0) != "Vs")
+            std::cerr << "Pinyin Style::SHUANGPIN test failed." << std::endl;
+        if (g2p_zh->hanziToPinyin("中国", Pinyin::ManTone::Style::SHUANGPIN, Pinyin::Error::Default, false,
+                                  false, false).toStdStr() != "Vs Go")
+            std::cerr << "Hanzi Style::SHUANGPIN test failed." << std::endl;
         if (g2p_zh->getDefaultPinyin("虐", Pinyin::ManTone::Style::TONE3, true).at(0) != "nüe4")
             std::cerr << "V-to-U test failed." << std::endl;
         if (g2p_zh->getDefaultPinyin("虐", Pinyin::ManTone::Style::TONE3, false).at(0) != "nve4")

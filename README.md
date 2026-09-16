@@ -1,3 +1,7 @@
+> **Frozen Mandarin build in this package**
+>
+> This package adds a fileless frozen Mandarin LUT path. Feature defaults are centralized in `include/cpp-pinyin/config.h`; see `FROZEN_MANDARIN.md` and `VALIDATION_FROZEN.md`. The upstream file-backed implementation remains available behind `CPP_PINYIN_ENABLE_FILE_IO`.
+
 # cpp-pinyin
 
 ## Intro
@@ -57,6 +61,11 @@ const std::string hans = "明月@1几32时有##一";
 PinyinResVector pinyinRes = g2p_zh->hanziToPinyin(hans, Pinyin::ManTone::Style::TONE3, Pinyin::Error::Default, true, false, true);
 
 std::vector<std::string> pinyin = g2p_man->getDefaultPinyin("了", Pinyin::ManTone::Style::TONE3, false, false)
+
+// Frozen Mandarin also extends the original ManTone::Style enum with SHUANGPIN.
+// No second output-style enum is required.
+auto shuangpin = g2p_man->hanziToPinyin("中国", Pinyin::ManTone::Style::SHUANGPIN,
+                                        Pinyin::Error::Default, false, false, false);
 ```
 
 ## Doc
