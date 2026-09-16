@@ -1,9 +1,14 @@
 #ifndef DICTUTIL_H
 #define DICTUTIL_H
 
+#include <cpp-pinyin/PinyinGlobal.h>
+
+#if CPP_PINYIN_ENABLE_FILE_IO
 #include <filesystem>
 #include <functional>
 #include <unordered_map>
+#include <vector>
+#include <string>
 
 #include "ManToneUtil.h"
 
@@ -29,6 +34,7 @@ namespace Pinyin
                             const std::string &sep2 = " ",
                             const std::function<std::u16string(const std::u16string &pinyin)> &converterForDefaultPinyin
                                 = tone3ToTone);
-} // Pinyin
+}
+#endif // CPP_PINYIN_ENABLE_FILE_IO
 
-#endif //DICTUTIL_H
+#endif // DICTUTIL_H

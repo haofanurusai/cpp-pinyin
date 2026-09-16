@@ -1,12 +1,17 @@
 #ifndef ChineseG2pPRIVATE_H
 #define ChineseG2pPRIVATE_H
 
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 
 #include <cpp-pinyin/ToneConverter.h>
+#include <cpp-pinyin/PinyinGlobal.h>
 
 #include "cpp-pinyin/U16Str.h"
+#if CPP_PINYIN_ENABLE_FILE_IO
+#include "frozen/FrozenPinyinInternal.h"
+#endif
 
 namespace Pinyin
 {
@@ -19,6 +24,9 @@ namespace Pinyin
 
         bool initialized = false;
 
+        // Legacy mutable dictionaries are retained so CPP_PINYIN_ENABLE_FILE_IO=1 keeps
+        // the original behavior and custom-dictionary APIs.  In the default frozen build
+        // these containers stay empty and allocate no dictionary nodes.
         std::unordered_map<char16_t, std::u16string> phrases_map;
         std::unordered_map<std::u16string, std::vector<std::u16string>> phrases_dict;
         std::unordered_map<char16_t, std::vector<std::u16string>> word_dict;
@@ -32,12 +40,20 @@ namespace Pinyin
         }
 
         inline char16_t tradToSim(const char16_t &oneHanzi) const {
+#if CPP_PINYIN_ENABLE_TRADITIONAL
             const auto &it = trans_dict.find(oneHanzi);
             return it != trans_dict.end() ? it->second : oneHanzi;
+#else
+            return oneHanzi;
+#endif
         }
 
         inline std::u16string toneConvert(const std::u16string &pinyin, int style, bool v_to_u = false,
                                           bool neutral_tone_with_five = false) const {
+#if CPP_PINYIN_ENABLE_FILE_IO
+            if (style == static_cast<int>(ManTone::Style::SHUANGPIN))
+                return frozenFullPinyinToShuangpin(pinyin);
+#endif
             return m_toneConverter.convert({pinyin.begin(), pinyin.end()}, style, v_to_u, neutral_tone_with_five);
         }
 
@@ -79,8 +95,10 @@ namespace Pinyin
             return toneCandidates;
         }
 
+#if CPP_PINYIN_ENABLE_FILE_IO
         void zhPosition(const std::vector<std::u16string> &input, std::vector<char16_t> &res,
                         std::vector<bool> &positions);
+#endif
     };
 }
 

@@ -1,3 +1,6 @@
+#include <cpp-pinyin/PinyinGlobal.h>
+
+#if CPP_PINYIN_ENABLE_FILE_IO
 #include "DictUtil.h"
 
 #include <filesystem>
@@ -138,3 +141,5 @@ namespace Pinyin
                            });
     }
 } // namespace Pinyin
+
+#endif // CPP_PINYIN_ENABLE_FILE_IO

@@ -1,10 +1,14 @@
 #include <cpp-pinyin/G2pglobal.h>
 
-#include <memory>
 #include <unordered_set>
+
+#if CPP_PINYIN_ENABLE_FILE_IO
+#include <memory>
+#endif
 
 namespace Pinyin
 {
+#if CPP_PINYIN_ENABLE_FILE_IO
     class G2pGlobal {
     public:
         std::filesystem::path path;
@@ -19,6 +23,7 @@ namespace Pinyin
     void setDictionaryPath(const std::filesystem::path &dir) {
         m_global->path = dir;
     }
+#endif
 
     bool isLetter(const char16_t &c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
