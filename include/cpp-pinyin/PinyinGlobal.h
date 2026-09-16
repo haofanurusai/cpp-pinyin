@@ -1,6 +1,8 @@
 #ifndef PINYINGLOBAL_H
 #define PINYINGLOBAL_H
 
+#include <cpp-pinyin/config.h>
+
 #ifdef _MSC_VER
 #  define CPP_PINYIN_DECL_EXPORT __declspec(dllexport)
 #  define CPP_PINYIN_DECL_IMPORT __declspec(dllimport)

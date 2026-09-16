@@ -1,10 +1,13 @@
 #ifndef ChineseG2p_H
 #define ChineseG2p_H
 
-#include <filesystem>
 #include <memory>
 
 #include <cpp-pinyin/PinyinGlobal.h>
+#if CPP_PINYIN_ENABLE_FILE_IO
+#include <filesystem>
+#endif
+
 #include <cpp-pinyin/PinyinRes.h>
 #include <cpp-pinyin/ToneConverter.h>
 
@@ -27,9 +30,12 @@ namespace Pinyin
 
         bool initialized() const;
 
+#if CPP_PINYIN_ENABLE_FILE_IO
         bool loadCustomUserDict(const std::filesystem::path &filePath, bool clearRawData = true) const;
-
+#if CPP_PINYIN_ENABLE_TRADITIONAL
         bool loadCustomFanJianDictionary(const std::filesystem::path &filePath, bool clearRawData = true) const;
+#endif
+#endif
 
         void setToneConverter(const ToneConverter &toneConverter) const;
 

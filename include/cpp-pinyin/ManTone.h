@@ -17,7 +17,10 @@ namespace Pinyin
             // 声调风格2，即拼音声调在各个韵母之后，用数字 [1-4] 进行表示。如： 中国 -> ``zho1ng guo2``
             TONE2 = 2,
             // 声调风格3，即拼音声调在各个拼音之后，用数字 [1-4] 进行表示。如： 中国 -> ``zhong1 guo2``
-            TONE3 = 8
+            TONE3 = 8,
+            // 微软双拼直通风格。Frozen Mandarin 路径直接输出两个双拼 ASCII 字符。
+            // 选用独立 bit 值以保持原有 Style 数值 ABI 不变。
+            SHUANGPIN = 16
         };
 
         ManTone() {
