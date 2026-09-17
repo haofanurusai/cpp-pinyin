@@ -32,30 +32,11 @@ namespace Pinyin
             return true;
         }
 
-        /* Previous full-tone-string lookup, retained for reference only:
-        const char *toneMarkedFinal(std::uint8_t offset, std::uint8_t tone) {
-            switch (tone) {
-            case 1: return FrozenData::kFinalToneMarked1 + offset;
-            case 2: return FrozenData::kFinalToneMarked2 + offset;
-            case 3: return FrozenData::kFinalToneMarked3 + offset;
-            case 4: return FrozenData::kFinalToneMarked4 + offset;
-            default: return FrozenData::kFinalBase + offset;
-            }
-        }
-        */
-
         std::uint8_t legacyTone2Position(std::uint8_t finalMeta) {
             // bit0 stores the zero-based marked-vowel position. TONE2 inserts
             // the digit after that ASCII vowel, so the legacy position is +1.
             return static_cast<std::uint8_t>((finalMeta & 0x01u) + 1u);
         }
-
-        /* Previous fixed-stride lookup, retained for reference only:
-        const std::uint8_t iid = FrozenData::kInitialId[initialIndex];
-        const std::uint8_t fid = FrozenData::kFinalId[finalIndex];
-        out.initial = FrozenData::kInitialText[iid];
-        out.finalBase = FrozenData::kFinalBase[fid];
-        */
 
         std::size_t appendChar(char ch, char *out, std::size_t cap, std::size_t pos, bool useUmlaut) {
             if (useUmlaut && ch == 'v') {
@@ -144,6 +125,8 @@ namespace Pinyin
                                      char *out, std::size_t capacity, bool useUmlaut,
                                      bool neutralToneWithFive) {
         if (!out || capacity == 0 || packed == 0) return 0;
+        if (style == ManTone::Style::TONE2)
+            return legacyTone2(packed, out, capacity, useUmlaut);
         if (style == ManTone::Style::SHUANGPIN) {
             if (capacity < 3) return 0;
             const FrozenPinyin16 pair = frozenPinyinAsciiPair(packed);
